@@ -8,7 +8,8 @@
 
 const importLocal = require('import-local');
 
-if (!importLocal(__filename)) {
+if (importLocal(__filename)) {
+  console.log("Jest-cli called");
   if (process.env.NODE_ENV == null) {
     process.env.NODE_ENV = 'test';
   }

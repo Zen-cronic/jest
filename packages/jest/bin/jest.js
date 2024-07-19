@@ -8,6 +8,7 @@
 
 const importLocal = require('import-local');
 
-if (!importLocal(__filename)) {
+if (importLocal(__filename)) {
+  console.log("Calling Jest-cli");
   require('jest-cli/bin/jest');
 }

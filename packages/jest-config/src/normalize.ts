@@ -50,6 +50,7 @@ import {
   replaceRootDirInPath,
   resolve,
 } from './utils';
+import {pathToFileURL} from 'url';
 
 const ERROR = `${BULLET}Validation Error`;
 const PRESET_EXTENSIONS = ['.json', '.js', '.cjs', '.mjs'];
@@ -768,16 +769,54 @@ export default async function normalize(
         break;
       case 'moduleDirectories':
       case 'testMatch':
+        //C:\..\jest-forked\bug-15132\+folderStartingWithSpecialCharacter
+        console.log('Default root dir:', options.rootDir);
+
         {
           const replacedRootDirTags = _replaceRootDirTags(
             escapeGlobCharacters(options.rootDir),
             oldOptions[key],
           );
 
+          //[C:\\..\\bug-15132\\+folderStartingWithSpecialCharacter\\**\\test.js]
+          console.log({replacedRootDirTags});
+
           if (replacedRootDirTags) {
+            // const isArr = Array.isArray(replacedRootDirTags);
+            // console.log({isArr});
+
             value = Array.isArray(replacedRootDirTags)
-              ? replacedRootDirTags.map(replacePathSepForGlob)
-              : replacePathSepForGlob(replacedRootDirTags);
+              ? replacedRootDirTags.map(rootDirTag => {
+                  let origReplaced = replacePathSepForGlob(rootDirTag);
+
+                  // 'C:/.../jest-forked/bug-15132\\+folderStartingWithSpecialCharacter/**/test.js'
+
+                  // return origReplaced;
+                  //'C:/.../jest-forked/bug-15132/+folderStartingWithSpecialCharacter/**/test.js'
+                  origReplaced = origReplaced.replaceAll(/\\/g, '/');
+                  console.log({origReplaced});
+
+                  return origReplaced;
+                })
+              : replacePathSepForGlob(replacedRootDirTags).replaceAll(
+                  /\\/g,
+                  '/',
+                );
+            // log
+            // ?  replacedRootDirTags.map(rootDirTag => {
+            //     // const replaced = replacePathSepForGlob(rootDirTag)
+            //     const replaced = replacePathSepForGlob(
+            //       pathToFileURL(rootDirTag).pathname,
+            //       // .replace(/^\//, '') // to remove start trailing /
+            //     );
+            //     console.log({replaced});
+            //     return replaced;
+            //   })
+            // : replacePathSepForGlob(replacedRootDirTags);
+
+            //sol A
+            // ? replacedRootDirTags.map((rootDirTag) => replacePathSepForGlob(pathToFileURL(rootDirTag).pathname))
+            // : replacePathSepForGlob(pathToFileURL(replacedRootDirTags).pathname);
           } else {
             value = replacedRootDirTags;
           }

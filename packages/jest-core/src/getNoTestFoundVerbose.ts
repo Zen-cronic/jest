@@ -10,11 +10,13 @@ import type {Config} from '@jest/types';
 import {pluralize} from 'jest-util';
 import type {Stats, TestRunData} from './types';
 
-export default function getNoTestFoundVerbose(
+// export default function getNoTestFoundVerbose(
+function getNoTestFoundVerbose(
   testRunData: TestRunData,
   globalConfig: Config.GlobalConfig,
   willExitWith0: boolean,
 ): string {
+  // throw new Error("Jello")
   const individualResults = testRunData.map(testRun => {
     const stats = testRun.matches.stats || ({} as Stats);
     const config = testRun.context.config;
@@ -24,10 +26,15 @@ export default function getNoTestFoundVerbose(
           return null;
         }
         const value = (config as Record<string, unknown>)[key];
+        console.error({value});
+        process.stdout.write((('value: ' + value) as string) + '\n');
+        process.stderr.write((('value: ' + value) as string) + '\n');
         if (value) {
           const valueAsString = Array.isArray(value)
             ? value.join(', ')
             : String(value);
+          console.log({valueAsString});
+
           const matches = pluralize('match', stats[key] || 0, 'es');
           return `  ${key}: ${chalk.yellow(valueAsString)} - ${matches}`;
         }
@@ -35,7 +42,7 @@ export default function getNoTestFoundVerbose(
       })
       .filter(Boolean)
       .join('\n');
-
+    
     return testRun.matches.total
       ? `In ${chalk.bold(config.rootDir)}\n` +
           `  ${pluralize(

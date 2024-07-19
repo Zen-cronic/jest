@@ -9,6 +9,7 @@ import * as path from 'path';
 import chalk = require('chalk');
 import Resolver from 'jest-resolve';
 import {ValidationError} from 'jest-validate';
+import {pathToFileURL} from 'url';
 
 type ResolveOptions = {
   rootDir: string;
@@ -51,21 +52,65 @@ export const resolve = (
   return module!;
 };
 
-export const escapeGlobCharacters = (path: string): string =>
-  path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
+export const escapeGlobCharacters = (path: string): string => {
+ 
+
+  // return   path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
+
+  const nonUnifiedPath = path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
+  //   C:\\\\...\\\\jest-forked\\\\bug-15132\\\\+folderStartingWithSpecialCharacter
+  // '
+  console.log({nonUnifiedPath});
+
+  let unifiedPath = path.replaceAll(/\\/g, '/');
+  //  //C:/../jest-forked/bug-15132/+folderStartingWithSpecialCharacter
+
+  unifiedPath = unifiedPath.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
+
+  //
+  console.log({unifiedPath});
+
+  return unifiedPath
+
+  // return path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1'); // undef
+};
 
 export const replaceRootDirInPath = (
   rootDir: string,
   filePath: string,
 ): string => {
+  //filePath
+  //C:\\..\\jest-forked\\bug-15132\\+folderStartingWithSpecialCharacter\\coverage
+  // testMatch: '<rootDir>/**/test.js'
+  // console.log({filePath});
+
   if (!filePath.startsWith('<rootDir>')) {
+    // console.log("Early return from replaceRootdirInpath");
+
     return filePath;
   }
 
-  return path.resolve(
+  //C:/../jest/jest-forked/bug-15132/+folderStartingWithSpecialCharacter
+  console.log('glob escaped rootDir:', {rootDir});
+
+  // const replacedBackslashRootDir = pathToFileURL(rootDir).pathname;
+  // console.log({replacedBackslashRootDir});
+
+  const resolvedReplaceRootDirInPath = path.resolve(
     rootDir,
     path.normalize(`./${filePath.slice('<rootDir>'.length)}`),
+    // path.normalize(`./${escapeGlobCharacters(filePath).slice('<rootDir>'.length)}`),
   );
+
+  //C:\\..\\bug-15132\\+folderStartingWithSpecialCharacter\\**\\test.js
+  console.log({resolvedReplaceRootDirInPath});
+  return resolvedReplaceRootDirInPath;
+
+  // return path.resolve(
+  //   rootDir,
+  //   // replacedBackslashRootDir,
+  //   path.normalize(`./${filePath.slice('<rootDir>'.length)}`),
+  // );
 };
 
 const _replaceRootDirInObject = <T extends ReplaceRootDirConfigObj>(
