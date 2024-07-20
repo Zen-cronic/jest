@@ -64,7 +64,7 @@ export default class HasteFS implements IHasteFS {
     }
   }
 
-  matchFiles(pattern: RegExp | string): Array<string> {
+  matchFiles(pattern: RegExp | string): Array<string> {   
     if (!(pattern instanceof RegExp)) {
       pattern = new RegExp(pattern);
     }

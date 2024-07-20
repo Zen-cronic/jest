@@ -16,6 +16,9 @@ export default function createContext(
   config: Config.ProjectConfig,
   {hasteFS, moduleMap}: HasteContext,
 ): TestContext {
+  console.warn("Entering createContext");
+  console.log("Config:", config);
+  console.log("HasteMap:", hasteFS);
   return {
     config,
     hasteFS,

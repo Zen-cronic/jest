@@ -28,7 +28,7 @@ export async function run(
     console.log("\t" + chalk.redBright(runCLI.name), "called from", chalk.red(run.name), "of jest-cli/src/run.ts");
     
     const {results, globalConfig} = await runCLI(argv, projects);
-    //NOT successfully run
+    //NOT successfully run    
     console.log(chalk.greenBright(runCLI.name), "successfully run by", chalk.green(run.name));
     
     readResultsAndExit(results, globalConfig);

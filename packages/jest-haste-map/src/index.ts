@@ -360,9 +360,22 @@ class HasteMap extends EventEmitter implements IHasteMap {
   }
 
   build(): Promise<InternalHasteMapObject> {
+    console.warn(
+      '\t' + this.build.name,
+      'called! from',
+      HasteMap.name,
+      'constructor',
+    );
+    // console.trace("build()")
     if (!this._buildPromise) {
+      console.warn('\t' + 'this._buildPromise under construction');
+
       this._buildPromise = (async () => {
+        console.warn('\t' + 'Inside construction of this._buildPromise');
+
         const data = await this._buildFileMap();
+
+        console.log({data});
 
         // Persist when we don't know if files changed (changedFiles undefined)
         // or when we know a file was changed or deleted.
@@ -379,6 +392,8 @@ class HasteMap extends EventEmitter implements IHasteMap {
         }
 
         const rootDir = this._options.rootDir;
+        console.log({rootDirFromBuild: rootDir}); //DNLog
+
         const hasteFS = new HasteFS({
           files: hasteMap.files,
           rootDir,
@@ -399,6 +414,9 @@ class HasteMap extends EventEmitter implements IHasteMap {
         };
       })();
     }
+    console.warn('\t' + 'Exiting', this.build.name);
+    // console.trace("build()")
+
     return this._buildPromise;
   }
 
@@ -435,6 +453,8 @@ class HasteMap extends EventEmitter implements IHasteMap {
     changedFiles?: FileData;
     hasteMap: InternalHasteMap;
   }> {
+    console.warn('\t' + 'Entering', this._buildFileMap.name);
+
     let hasteMap: InternalHasteMap;
     try {
       const read = this._options.resetCache ? this._createEmptyMap : this.read;
@@ -442,6 +462,9 @@ class HasteMap extends EventEmitter implements IHasteMap {
     } catch {
       hasteMap = this._createEmptyMap();
     }
+    console.warn('\t' + 'Exiting', this._buildFileMap.name);
+    // console.log(await this._crawl(hasteMap)); //DNLog
+
     return this._crawl(hasteMap);
   }
 
@@ -761,6 +784,12 @@ class HasteMap extends EventEmitter implements IHasteMap {
   }
 
   private async _crawl(hasteMap: InternalHasteMap) {
+    console.warn('\t' + 'Entering', this._crawl.name);
+    console.warn(
+      '\t' +
+        `Using ${(await this._shouldUseWatchman()) ? `watchmanCrawl` : `nodeCrawl`} for crawling`,
+    );
+
     const options = this._options;
     const ignore = this._ignore.bind(this);
     const crawl = (await this._shouldUseWatchman()) ? watchmanCrawl : nodeCrawl;
@@ -793,13 +822,24 @@ class HasteMap extends EventEmitter implements IHasteMap {
           );
         });
       }
-
+      
       throw retryError;
     };
 
     try {
-      return await crawl(crawlerOptions);
+      // console.warn('\tNU RETRY error from _crawl');
+
+      const result = await crawl(crawlerOptions);
+      console.log({result}); //DNLog
+      
+      console.warn('\tNU RETRY error from _crawl'); //DNLog
+
+      return result;
+
+      // return await crawl(crawlerOptions);
     } catch (error: any) {
+      console.log('\tRETRY error from _crawl'); //DNLog
+
       return retry(error);
     }
   }

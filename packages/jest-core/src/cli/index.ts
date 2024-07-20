@@ -116,7 +116,12 @@ export async function runCLI(
       results = r;
     },
   );
-  
+  console.log(
+    '\t' + chalk.yellowBright(_run10000.name),
+    'successfully finished from',
+    chalk.yellow(runCLI.name),
+  );
+
   if (argv.watch || argv.watchAll) {
     // If in watch mode, return the promise that will never resolve.
     // If the watch mode is interrupted, watch should handle the process
@@ -156,46 +161,99 @@ const buildContextsAndHasteMaps = async (
   outputStream: WriteStream,
 ) => {
   try {
-    
- 
-  console.log("\t" + "from the START of", chalk.yellowBright(buildContextsAndHasteMaps.name));
-  
-  const hasteMapInstances = Array.from<IHasteMap>({
-    length: configs.length,
-  });
-  const contexts = await Promise.all(
-    configs.map(async (config, index) => {
-      createDirectory(config.cacheDirectory);
-      const hasteMapInstance = await Runtime.createHasteMap(config, {
-        console: new CustomConsole(outputStream, outputStream),
-        maxWorkers: Math.max(
-          1,
-          Math.floor(globalConfig.maxWorkers / configs.length),
-        ),
-        resetCache: !config.cache,
-        watch: globalConfig.watch || globalConfig.watchAll,
-        watchman: globalConfig.watchman,
-        workerThreads: globalConfig.workerThreads,
-      });
-      hasteMapInstances[index] = hasteMapInstance;
-      // console.log(hasteMapInstance);
-      
-      const context = createContext(config, await hasteMapInstance.build());
-      console.log("created Context:",  context);
-      
-      return context
-      // return createContext(config, await hasteMapInstance.build());
-    }),
-  );
-  console.log(contexts);
-  
-  console.log("\t" + "from the END of", chalk.yellowBright(buildContextsAndHasteMaps.name));
+    console.log(
+      '\t' + 'from the START of',
+      chalk.yellowBright(buildContextsAndHasteMaps.name),
+    );
 
-  return {contexts, hasteMapInstances};
-} catch (error) {
-      console.error(error);
-      throw error
-}
+    const hasteMapInstances = Array.from<IHasteMap>({
+      length: configs.length,
+    });
+    const contexts = await Promise.all(
+      configs.map(async (config, index) => {
+        createDirectory(config.cacheDirectory);
+        const hasteMapInstance = await Runtime.createHasteMap(config, {
+          console: new CustomConsole(outputStream, outputStream),
+          maxWorkers: Math.max(
+            1,
+            Math.floor(globalConfig.maxWorkers / configs.length),
+          ),
+          resetCache: !config.cache,
+          watch: globalConfig.watch || globalConfig.watchAll,
+          watchman: globalConfig.watchman,
+          workerThreads: globalConfig.workerThreads,
+        });
+        hasteMapInstances[index] = hasteMapInstance;
+        // console.log(hasteMapInstance); //works
+
+        console.log(
+          '\tLength of hasteMapInstances:',
+          chalk.yellow(hasteMapInstances.length),
+          'from',
+          chalk.red(buildContextsAndHasteMaps.name),
+        );
+
+        //object [object Object]
+        // console.log(
+        //   '\tTypeof hasteMapInstance:',
+        //   typeof hasteMapInstance,
+        //   ';Class name:',
+        //   Object.prototype.toString.call(hasteMapInstance),
+        // );
+
+        //Exists
+        console.log(chalk.bold('----hasteMapInstance---'));
+        // console.log(JSON.stringify(hasteMapInstance, null,2));
+        // console.log(hasteMapInstance);
+        console.log(await hasteMapInstance.build()); //NTH
+        const a = await hasteMapInstance.build();
+        console.log(a.hasteFS.exists('Jello')); //NTH
+
+        // Object.entries(hasteMapInstance).forEach(([k,v]) => {
+
+        //   console.log({[k]: v});
+
+        // })
+        const hasteMapBuildResult = await hasteMapInstance.build();
+        console.log(JSON.stringify(hasteMapBuildResult));
+        console.log(
+          '\tTypeof hasteMapBuildResult:',
+          typeof hasteMapBuildResult,
+          ';Class name:',
+          Object.prototype.toString.call(hasteMapBuildResult),
+        );
+
+        Object.entries(hasteMapBuildResult).forEach(([k, v]) => {
+          console.log({[k]: v});
+        });
+        console.warn('\thasteMapBuildResult:', hasteMapBuildResult.moduleMap);
+
+        if (typeof hasteMapInstance.build === 'function') {
+          console.warn('\t' + hasteMapInstance.build.name, 'is a fn');
+        }
+        if (typeof createContext === 'function') {
+          console.warn('\t' + createContext.name, 'is a fn');
+        }
+
+        const context = createContext(config, await hasteMapInstance.build());
+        console.log('created Context:', context.config);
+        throw new Error('Jello');
+        return context;
+        // return createContext(config, await hasteMapInstance.build());
+      }),
+    );
+    console.log("Contexts[0]",contexts[0]);
+
+    console.log(
+      '\t' + 'from the END of',
+      chalk.yellowBright(buildContextsAndHasteMaps.name),
+    );
+
+    return {contexts, hasteMapInstances};
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 const _run10000 = async (
@@ -272,7 +330,10 @@ const _run10000 = async (
       outputStream,
     );
     //WHY NOT logged?
-    console.log("\t" + chalk.green(buildContextsAndHasteMaps.name), "successfully run!");
+    console.log(
+      '\t' + chalk.green(buildContextsAndHasteMaps.name),
+      'successfully run!',
+    );
 
     performance.mark('jest/buildContextsAndHasteMaps:end');
 
@@ -303,6 +364,8 @@ const _run10000 = async (
           filter,
         );
   } catch (error) {
+    console.log(chalk.bgRedBright('Error from', _run10000.name));
+
     console.error(error);
     throw error;
   }

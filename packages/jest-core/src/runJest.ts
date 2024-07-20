@@ -164,6 +164,8 @@ export default async function runJest({
   // from Jest's config loading to running the tests
   Resolver.clearDefaultResolverCache();
 
+  console.log("Entering", chalk.yellow(runJest.name));
+  
   const Sequencer: typeof TestSequencer = await requireOrImportModule(
     globalConfig.testSequencer,
   );
@@ -250,7 +252,7 @@ export default async function runJest({
   }
 
   const hasTests = allTests.length > 0;
-  console.log({hasTests});
+  // console.log("");
   
   if (!hasTests) {
     const {exitWith0, message: noTestsFoundMessage} = getNoTestsFoundMessage(

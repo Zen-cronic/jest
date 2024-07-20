@@ -17,6 +17,8 @@ export default function getNoTestsFoundMessage(
   testRunData: TestRunData,
   globalConfig: Config.GlobalConfig,
 ): {exitWith0: boolean; message: string} {
+  console.warn("\t" + getNoTestsFoundMessage.name, "invoked");
+  
   const exitWith0 =
     globalConfig.passWithNoTests ||
     globalConfig.lastCommit ||

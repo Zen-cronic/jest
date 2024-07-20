@@ -66,7 +66,15 @@ function find(
   const result: Result = [];
   let activeCalls = 0;
 
+  console.warn("\t" +  "Entering", find.name );
+
   function search(directory: string): void {
+    // console.trace("search")
+
+    //1 C:\...jest-forked\bug-15132\+folderStartingWithSpecialCharacter 
+    //2 C:\...jest-forked\bug-15132\+folderStartingWithSpecialCharacter\node_modules
+    console.warn("\t" +"Current Searched dir", directory);
+    
     activeCalls++;
     fs.readdir(directory, {withFileTypes: true}, (err, entries) => {
       activeCalls--;
@@ -78,7 +86,8 @@ function find(
       }
       for (const entry of entries) {
         const file = path.join(directory, entry.name);
-
+        console.log({file});
+        
         if (ignore(file)) {
           continue;
         }
@@ -86,10 +95,11 @@ function find(
         if (entry.isSymbolicLink()) {
           continue;
         }
-        if (entry.isDirectory()) {
-          search(file);
-          continue;
-        }
+        //ignore node_modules for now
+        // if (entry.isDirectory()) {
+        //   search(file);
+        //   continue;
+        // }
 
         activeCalls++;
 
@@ -123,6 +133,8 @@ function find(
     });
   }
 
+  console.warn("\t" + "roots.length from", find.name, roots.length ); //1
+  
   if (roots.length > 0) {
     for (const root of roots) search(root);
   } else {
@@ -207,7 +219,8 @@ export async function nodeCrawl(options: CrawlerOptions): Promise<{
   } = options;
 
   const useNativeFind = await hasNativeFindSupport(forceNodeFilesystemAPI);
-
+  console.log({useNativeFind}); //false
+  
   return new Promise(resolve => {
     const callback = (list: Result) => {
       const files = new Map();
@@ -225,7 +238,8 @@ export async function nodeCrawl(options: CrawlerOptions): Promise<{
         removedFiles.delete(relativeFilePath);
       }
       data.files = files;
-
+      console.log({hasteMap: data}); //DNLog
+      
       resolve({
         hasteMap: data,
         removedFiles,
