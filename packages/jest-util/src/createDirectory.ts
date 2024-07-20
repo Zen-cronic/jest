@@ -11,6 +11,8 @@ export default function createDirectory(path: string): void {
   try {
     fs.mkdirSync(path, {recursive: true});
   } catch (error: any) {
+    // throw error
+
     if (error.code !== 'EEXIST') {
       throw error;
     }

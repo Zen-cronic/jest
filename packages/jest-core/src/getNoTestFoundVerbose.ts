@@ -10,8 +10,8 @@ import type {Config} from '@jest/types';
 import {pluralize} from 'jest-util';
 import type {Stats, TestRunData} from './types';
 
-// export default function getNoTestFoundVerbose(
-function getNoTestFoundVerbose(
+export default function getNoTestFoundVerbose(
+// function getNoTestFoundVerbose(
   testRunData: TestRunData,
   globalConfig: Config.GlobalConfig,
   willExitWith0: boolean,
@@ -76,7 +76,7 @@ function getNoTestFoundVerbose(
 
   return (
     `${chalk.bold('No tests found, exiting with code 1')}\n` +
-    'Run with `--passWithNoTests` to exit with code 0' +
+    'Run with `--passWithNoTests` to exit with code 0x99' +
     `\n${individualResults.join('\n')}\n${dataMessage}`
   );
 }

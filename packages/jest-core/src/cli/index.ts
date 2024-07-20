@@ -6,7 +6,7 @@
  */
 
 import {performance} from 'perf_hooks';
-import type {WriteStream} from 'tty';
+import {WriteStream} from 'tty';
 import chalk = require('chalk');
 import exit = require('exit');
 import * as fs from 'graceful-fs';
@@ -49,6 +49,10 @@ export async function runCLI(
   // it'll break the JSON structure and it won't be valid.
   const outputStream =
     argv.json || argv.useStderr ? process.stderr : process.stdout;
+
+  console.log(
+    `async ${chalk.redBright(`readConfigs()`)} called from runCLI() of jest-core/src/cli`,
+  );
 
   const {globalConfig, configs, hasDeprecationWarnings} = await readConfigs(
     argv,
@@ -97,6 +101,12 @@ export async function runCLI(
     );
   }
 
+  console.log(
+    '\t' + chalk.redBright(_run10000.name),
+    'called from',
+    chalk.red(runCLI.name),
+  );
+
   await _run10000(
     globalConfig,
     configsOfProjectsToRun,
@@ -106,7 +116,7 @@ export async function runCLI(
       results = r;
     },
   );
-
+  
   if (argv.watch || argv.watchAll) {
     // If in watch mode, return the promise that will never resolve.
     // If the watch mode is interrupted, watch should handle the process
@@ -145,6 +155,11 @@ const buildContextsAndHasteMaps = async (
   globalConfig: Config.GlobalConfig,
   outputStream: WriteStream,
 ) => {
+  try {
+    
+ 
+  console.log("\t" + "from the START of", chalk.yellowBright(buildContextsAndHasteMaps.name));
+  
   const hasteMapInstances = Array.from<IHasteMap>({
     length: configs.length,
   });
@@ -163,11 +178,24 @@ const buildContextsAndHasteMaps = async (
         workerThreads: globalConfig.workerThreads,
       });
       hasteMapInstances[index] = hasteMapInstance;
-      return createContext(config, await hasteMapInstance.build());
+      // console.log(hasteMapInstance);
+      
+      const context = createContext(config, await hasteMapInstance.build());
+      console.log("created Context:",  context);
+      
+      return context
+      // return createContext(config, await hasteMapInstance.build());
     }),
   );
+  console.log(contexts);
+  
+  console.log("\t" + "from the END of", chalk.yellowBright(buildContextsAndHasteMaps.name));
 
   return {contexts, hasteMapInstances};
+} catch (error) {
+      console.error(error);
+      throw error
+}
 };
 
 const _run10000 = async (
@@ -191,6 +219,8 @@ const _run10000 = async (
   // We will wait on an async response from this before using the filter.
   let filter: Filter | undefined;
   if (globalConfig.filter && !globalConfig.skipFilter) {
+    console.warn('\t' + 'Early return from', chalk.red(_run10000.name));
+
     const rawFilter = require(globalConfig.filter);
     let filterSetupPromise: Promise<unknown | undefined> | undefined;
     if (rawFilter.setup) {
@@ -218,31 +248,64 @@ const _run10000 = async (
   }
 
   performance.mark('jest/buildContextsAndHasteMaps:start');
-  const {contexts, hasteMapInstances} = await buildContextsAndHasteMaps(
-    configs,
-    globalConfig,
-    outputStream,
-  );
-  performance.mark('jest/buildContextsAndHasteMaps:end');
 
-  globalConfig.watch || globalConfig.watchAll
-    ? await runWatch(
-        contexts,
-        configs,
-        hasDeprecationWarnings,
-        globalConfig,
-        outputStream,
-        hasteMapInstances,
-        filter,
-      )
-    : await runWithoutWatch(
-        globalConfig,
-        contexts,
-        outputStream,
-        onComplete,
-        changedFilesPromise,
-        filter,
-      );
+  console.log(
+    '\t',
+    chalk.redBright(buildContextsAndHasteMaps.name),
+    'called from',
+    chalk.red(_run10000.name),
+  );
+  //C:/.../jest/jest-forked/bug-15132/+folderStartingWithSpecialCharacter/**/test.js
+  console.log(
+    '\t',
+    'args to',
+    chalk.redBright(buildContextsAndHasteMaps.name),
+    ':',
+    configs[0].testMatch,
+  );
+  console.log();
+
+  try {
+    const {contexts, hasteMapInstances} = await buildContextsAndHasteMaps(
+      configs,
+      globalConfig,
+      outputStream,
+    );
+    //WHY NOT logged?
+    console.log("\t" + chalk.green(buildContextsAndHasteMaps.name), "successfully run!");
+
+    performance.mark('jest/buildContextsAndHasteMaps:end');
+
+    // console.log("\t" + chalk.redBright(runWithoutWatch.name), "called from", chalk.red(_run10000.name), globalConfig.watch || globalConfig.watchAll);
+    console.log(
+      '\t' + chalk.redBright('runWithoutWatch'),
+      'called from',
+      chalk.red('_run10000'),
+      globalConfig.watch || globalConfig.watchAll,
+    );
+
+    globalConfig.watch || globalConfig.watchAll
+      ? await runWatch(
+          contexts,
+          configs,
+          hasDeprecationWarnings,
+          globalConfig,
+          outputStream,
+          hasteMapInstances,
+          filter,
+        )
+      : await runWithoutWatch(
+          globalConfig,
+          contexts,
+          outputStream,
+          onComplete,
+          changedFilesPromise,
+          filter,
+        );
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 const runWatch = async (

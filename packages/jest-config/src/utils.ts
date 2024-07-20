@@ -53,10 +53,10 @@ export const resolve = (
 };
 
 export const escapeGlobCharacters = (path: string): string => {
- 
-
+  //orig
   // return   path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
 
+  //wrong
   const nonUnifiedPath = path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1');
   //   C:\\\\...\\\\jest-forked\\\\bug-15132\\\\+folderStartingWithSpecialCharacter
   // '
@@ -70,7 +70,7 @@ export const escapeGlobCharacters = (path: string): string => {
   //
   console.log({unifiedPath});
 
-  return unifiedPath
+  return unifiedPath;
 
   // return path.replaceAll(/([!()*?[\\\]{}])/g, '\\$1'); // undef
 };

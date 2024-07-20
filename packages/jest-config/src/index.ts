@@ -57,6 +57,15 @@ export async function readConfig(
     typeof packageRootOrConfig === 'string'
       ? path.resolve(packageRootOrConfig)
       : undefined;
+
+  //      C:\...\jest-forked\bug-15132\+folderStartingWi
+  // thSpecialCharacter
+  // console.warn('Package root:', packageRoot, typeof packageRoot);
+  console.warn('normalize called from readConfig');
+
+  //   C:\...\jest-forked\bug-15132\+folderStartingWithSpecialCharacter\jest.config.js
+  // console.warn('Config path from readConfig:', configPath, typeof configPath);
+
   const {options, hasDeprecationWarnings} = await normalize(
     initialOptions,
     argv,
@@ -331,6 +340,10 @@ export async function readInitialOptions(
     process.cwd(),
     skipMultipleConfigError,
   );
+  //C:\...\jest-forked\bug-15132\+folderStartingWithSpecialCharacter\
+  // jest.config.js
+  // console.warn("configPath from readInitialOptions", configPath)
+
   return {config: await readConfigFileAndSetRootDir(configPath), configPath};
 }
 
@@ -357,7 +370,16 @@ export async function readConfigs(
   let projects = projectPaths;
   let configPath: string | null | undefined;
 
+  console.log({projectPaths});
+
   if (projectPaths.length === 1) {
+    console.warn(
+      chalk.redBright('readConfig()'),
+      'called from',
+      chalk.redBright('readConfigs()'),
+      'from jest-config/src/index w/ 1 projectPaths',
+    );
+
     const parsedConfig = await readConfig(argv, projects[0]);
     configPath = parsedConfig.configPath;
 
@@ -374,6 +396,7 @@ export async function readConfigs(
   }
 
   if (projects.length > 0) {
+    
     const cwd =
       process.platform === 'win32' ? tryRealpath(process.cwd()) : process.cwd();
     const projectIsCwd = projects[0] === cwd;

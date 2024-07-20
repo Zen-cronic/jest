@@ -25,15 +25,23 @@ export async function run(
     const argv = await buildArgv(maybeArgv);
     const projects = getProjectListFromCLIArgs(argv, project);
 
+    console.log("\t" + chalk.redBright(runCLI.name), "called from", chalk.red(run.name), "of jest-cli/src/run.ts");
+    
     const {results, globalConfig} = await runCLI(argv, projects);
+    //NOT successfully run
+    console.log(chalk.greenBright(runCLI.name), "successfully run by", chalk.green(run.name));
+    
     readResultsAndExit(results, globalConfig);
   } catch (error: any) {
     clearLine(process.stderr);
     clearLine(process.stdout);
+    console.error("ERROR from run"); //WHY not logged?
+    
     if (error?.stack) {
       console.error(chalk.red(error.stack));
     } else {
       console.error(chalk.red(error));
+      // console.error(error);
     }
 
     exit(1);

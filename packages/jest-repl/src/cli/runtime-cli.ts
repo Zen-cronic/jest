@@ -66,6 +66,11 @@ export async function run(
     const info = cliInfo ? `, ${cliInfo.join(', ')}` : '';
     console.log(`Using Jest Runtime v${VERSION}${info}`);
   }
+  console.warn("\treadConfig called from run() of jest-repl/src/cli/runtime-cli");
+
+  // console.error("\t" + );
+  
+  
   const options = await readConfig(argv, root);
   const globalConfig = options.globalConfig;
   // Always disable automocking in scripts.
