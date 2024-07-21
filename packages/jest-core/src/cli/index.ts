@@ -237,7 +237,7 @@ const buildContextsAndHasteMaps = async (
 
         const context = createContext(config, await hasteMapInstance.build());
         console.log('created Context:', context.config);
-        throw new Error('Jello');
+        // throw new Error('Jello');
         return context;
         // return createContext(config, await hasteMapInstance.build());
       }),
@@ -319,7 +319,7 @@ const _run10000 = async (
     'args to',
     chalk.redBright(buildContextsAndHasteMaps.name),
     ':',
-    configs[0].testMatch,
+    configs[0]
   );
   console.log();
 
@@ -366,7 +366,7 @@ const _run10000 = async (
   } catch (error) {
     console.log(chalk.bgRedBright('Error from', _run10000.name));
 
-    console.error(error);
+    // console.error(error);
     throw error;
   }
 };

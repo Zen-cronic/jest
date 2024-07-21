@@ -64,7 +64,9 @@ export default class HasteFS implements IHasteFS {
     }
   }
 
-  matchFiles(pattern: RegExp | string): Array<string> {   
+  matchFiles(pattern: RegExp | string): Array<string> {  
+    // console.warn("matchFiles called");  //NU
+     
     if (!(pattern instanceof RegExp)) {
       pattern = new RegExp(pattern);
     }
@@ -83,6 +85,8 @@ export default class HasteFS implements IHasteFS {
 
     for (const file of this.getAbsoluteFileIterator()) {
       const filePath = root ? fastPath.relative(root, file) : file;
+      // console.warn("\tfilePath from", this.matchFilesWithGlob.name, filePath); //NU
+      
       if (matcher(replacePathSepForGlob(filePath))) {
         files.add(file);
       }

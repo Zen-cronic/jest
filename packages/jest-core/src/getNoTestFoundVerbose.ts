@@ -33,7 +33,8 @@ export default function getNoTestFoundVerbose(
           const valueAsString = Array.isArray(value)
             ? value.join(', ')
             : String(value);
-          console.log({valueAsString});
+            // : value;
+          // console.log({valueAsString});
 
           const matches = pluralize('match', stats[key] || 0, 'es');
           return `  ${key}: ${chalk.yellow(valueAsString)} - ${matches}`;

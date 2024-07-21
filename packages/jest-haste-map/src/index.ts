@@ -375,7 +375,7 @@ class HasteMap extends EventEmitter implements IHasteMap {
 
         const data = await this._buildFileMap();
 
-        console.log({data});
+        // console.log({data}); //DNLog but proceeds 
 
         // Persist when we don't know if files changed (changedFiles undefined)
         // or when we know a file was changed or deleted.
@@ -803,8 +803,12 @@ class HasteMap extends EventEmitter implements IHasteMap {
       rootDir: options.rootDir,
       roots: options.roots,
     };
+    console.warn("\toptions.rootDir from async",  this._crawl.name, options.rootDir);
+    
 
     const retry = (retryError: Error) => {
+      console.error("Retry called");
+      
       if (crawl === watchmanCrawl) {
         this._console.warn(
           'jest-haste-map: Watchman crawl failed. Retrying once with node ' +
@@ -830,7 +834,8 @@ class HasteMap extends EventEmitter implements IHasteMap {
       // console.warn('\tNU RETRY error from _crawl');
 
       const result = await crawl(crawlerOptions);
-      console.log({result}); //DNLog
+      // throw new Error("Crawl thrown") //DNThrow
+      // console.log({result}); //DNLog
       
       console.warn('\tNU RETRY error from _crawl'); //DNLog
 
@@ -838,7 +843,7 @@ class HasteMap extends EventEmitter implements IHasteMap {
 
       // return await crawl(crawlerOptions);
     } catch (error: any) {
-      console.log('\tRETRY error from _crawl'); //DNLog
+      console.log('\tCaught RETRY error from _crawl'); //DNLog
 
       return retry(error);
     }
